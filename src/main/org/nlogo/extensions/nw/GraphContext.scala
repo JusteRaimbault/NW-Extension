@@ -149,3 +149,9 @@ with algorithms.CentralityMeasurer {
 
   def unsubscribe(): Unit = monitoredTreeAgentSets.foreach(_.unsubscribe())
 }
+
+
+
+class WeightedGraphContext(override val world: World,override val turtleSet: AgentSet,override val linkSet: AgentSet,val weightedVar: String) extends GraphContext(world,turtleSet,linkSet) {
+  override def weight(link: Link): Double = super.weightFunction(weightedVar)(link)
+}
