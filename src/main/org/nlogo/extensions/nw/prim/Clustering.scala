@@ -1,11 +1,12 @@
 package org.nlogo.extensions.nw.prim
 
-import org.nlogo.agent.Turtle
+import org.nlogo.agent.{Link, Turtle}
 import org.nlogo.{agent, api}
 import org.nlogo.api.{AgentSet, ExtensionException, ScalaConversions, TypeNames}
 import org.nlogo.core.Syntax._
 import org.nlogo.core.{AgentKind, LogoList}
-import org.nlogo.extensions.nw.GraphContextProvider
+import org.nlogo.extensions.nw.{GraphContext, GraphContextProvider}
+import org.nlogo.extensions.nw.NetworkExtensionUtil.canonocilizeVar
 import org.nlogo.extensions.nw.algorithms.{ClusteringMetrics, Louvain}
 import org.nlogo.extensions.nw.util.TurtleSetsConverters.toTurtleSet
 
@@ -39,6 +40,17 @@ class LouvainCommunities(gcp: GraphContextProvider) extends api.Reporter {
   override def report(args: Array[api.Argument], context: api.Context): LogoList = {
     val graph = gcp.getGraphContext(context.getAgent.world)
     ScalaConversions.toLogoList(Louvain.cluster(graph, context.getRNG).map(toTurtleSet))
+  }
+}
+
+
+
+class WeightedLouvainCommunities(gcp: GraphContextProvider) extends api.Reporter {
+  override def getSyntax = reporterSyntax(right = List(StringType | SymbolType),ret = ListType)
+  override def report(args: Array[api.Argument], context: api.Context): LogoList = {
+    val weightVariable = canonocilizeVar(args(0).get)
+    val weightedGraph = gcp.getWeightedGraphContext(context.getAgent.world,weightVariable)
+    ScalaConversions.toLogoList(Louvain.cluster(weightedGraph, context.getRNG).map(toTurtleSet))
   }
 }
 
